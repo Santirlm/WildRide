@@ -1,0 +1,33 @@
+{
+  "name": "wildride",
+  "version": "1.0.0",
+  "description": "Proyecto final de Diseño de Interfaces Web en el cual participaran Mireya Chorro y Santiago Ramírez. El proyecto sera sobre apuestas de caballos.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Santirlm/WildRide.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Santirlm/WildRide/issues"
+  },
+  "homepage": "https://github.com/Santirlm/WildRide#readme",
+  "dependencies": {
+    "@tailwindcss/vite": "^4.2.4",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "method-override": "^3.0.0",
+    "mongoose": "^9.6.0",
+    "nunjucks": "^3.2.4",
+    "tailwindcss": "^4.2.4"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "nodemon": "^3.1.14",
+    "vite": "^8.0.10"
+  }
+}
