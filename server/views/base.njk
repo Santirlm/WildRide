@@ -4,7 +4,30 @@
         <title>{% block titulo %} {% endblock %}</title>
         <link rel="stylesheet" href="">
     </head>
-    <body>
+    <body class="bg-[#0a2d22]">
+    <nav class="bg-[#3D2B1F] text-white p-4 shadow-lg">
+                <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                <div class="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                <span class="text-[#1D4E3A] font-bold">WR</span>
+        </div>
+        <span class="text-2xl font-black tracking-tighter uppercase italic">Wild Ride</span>
+      </div>
+      <div class="space-x-6 text-sm font-medium uppercase tracking-widest">
+            <a href="#" class="hover:text-green-400 transition">Caballos</a>
+            <a href="#" class="hover:text-green-400 transition">Resultados</a>
+            <a href="#" class="bg-[#1D4E3A] px-4 py-2 rounded-md">Mi Cuenta</a>
+            </div>
+        </div>
+    </nav>
+    <header class="relative h-64 bg-slate-900 overflow-hidden">
+    <div class="absolute inset-0 bg-black/40 z-10"></div>
+    <img src="https://images.unsplash.com/photo-1534445867742-43195f401b6c?auto=format&fit=crop&q=80&w=2000" class="w-full h-full object-cover" alt="Race background">
+    <div class="relative z-20 max-w-7xl mx-auto h-full flex flex-col justify-center px-4">
+      <span class="text-green-400 font-bold uppercase tracking-widest text-sm">En Vivo: Gran Premio de Madrid</span>
+      <h2 class="text-4xl md:text-6xl text-white font-black italic uppercase">La emoción del Turf</h2>
+    </div>
+  </header>
         <div class="container">
             {% block contenido %}
 

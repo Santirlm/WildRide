@@ -4,6 +4,116 @@
 
 {% block contenido %}
 
+    <main class="max-w-7xl mx-auto py-10 px-4 grid grid-cols-1 lg:grid-cols-3 gap-8">
     
+    <section class="lg:col-span-2 space-y-6">
+      <h3 class="text-2xl font-bold border-b-2 border-[#3D2B1F] pb-2">Participantes</h3>
+
+      {% for caballo in caballos %}
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition group">
+        <div class="flex flex-col md:flex-row">
+          <div class="md:w-48 h-48 overflow-hidden">
+            <img src="{{ caballo.imagen }}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="Horse">
+          </div>
+          <div class="p-6 flex-1 flex flex-col justify-between">
+            <div>
+              <div class="flex justify-between items-start">
+                <h4 class="text-xl font-black uppercase">{{ caballo.nombre }}</h4>
+                
+              </div>
+              <p class="text-gray-500 text-sm mt-1 italic">Jockey: {{ caballo.jinete }}</p>
+            </div>
+            
+            <div class="mt-4 flex justify-between items-end">
+              <div class="flex space-x-4 text-xs font-bold text-gray-400 uppercase">
+                <div>Edad: <span class="text-[#3D2B1F]">{{ caballo.edad }}</span></div>
+                <div>Peso: <span class="text-[#3D2B1F]">{{ caballo.peso }}kg</span></div>
+              </div>
+              <button class="bg-[#1D4E3A] text-white px-6 py-2 rounded-md font-bold hover:bg-green-900 transition">
+                Cuota: {{ caballo.precio }}€
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+    <p class="text-gray-500 italic">No se han encontrado caballos con estos filtros.</p>
+  {% endfor %}
+      
+    </section>
+    <aside class="w-full max-w-sm bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+  <div class="p-6 space-y-6">
+    
+    <h3 class="text-xl font-bold text-[#3D2B1F]">Filtros y Ordenación</h3>
+    <form action="/caballos" method="GET" class="p-6 space-y-6">
+        <div class="relative">
+        <input 
+            type="text" 
+            placeholder="Buscar por nombre..." 
+            class="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1D4E3A] focus:border-transparent outline-none text-sm"
+        >
+        <span class="absolute right-3 top-2.5 text-gray-400">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+        </span>
+        </div>
+
+        <div class="space-y-3">
+        <h4 class="text-xs font-black uppercase tracking-wider text-gray-500">Edad</h4>
+        <div class="flex flex-wrap gap-4 text-sm">
+            <label class="flex items-center space-x-2 cursor-pointer">
+            <input type="checkbox" name="edad" class="w-4 h-4 rounded border-gray-300 text-[#1D4E3A] focus:ring-[#1D4E3A]">
+            <span class="text-[#3D2B1F]">2-3 años</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+            <input type="checkbox" name="edad" class="w-4 h-4 rounded border-gray-300 text-[#1D4E3A] focus:ring-[#1D4E3A]">
+            <span class="text-[#3D2B1F]">4-5 años</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+            <input type="checkbox" name="edad" class="w-4 h-4 rounded border-gray-300 text-[#1D4E3A] focus:ring-[#1D4E3A]">
+            <span class="text-[#3D2B1F]">6+ años</span>
+            </label>
+        </div>
+        </div>
+
+        <div class="space-y-3">
+        <h4 class="text-xs font-black uppercase tracking-wider text-gray-500">Peso</h4>
+        <div class="space-y-2 text-sm">
+            <label class="flex items-center space-x-2 cursor-pointer">
+            <input type="checkbox" name="peso" class="w-4 h-4 rounded border-gray-300 text-[#1D4E3A] focus:ring-[#1D4E3A]">
+            <span class="text-[#3D2B1F]">Ligero (<50kg)</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+            <input type="checkbox" name="peso" class="w-4 h-4 rounded border-gray-300 text-[#1D4E3A] focus:ring-[#1D4E3A]">
+            <span class="text-[#3D2B1F]">Medio (50-60kg)</span>
+            </label>
+            <label class="flex items-center space-x-2 cursor-pointer">
+            <input type="checkbox" name="peso" class="w-4 h-4 rounded border-gray-300 text-[#1D4E3A] focus:ring-[#1D4E3A]">
+            <span class="text-[#3D2B1F]">Pesado (>60kg)</span>
+            </label>
+        </div>
+        </div>
+
+        
+
+        <div class="space-y-3">
+        <h4 class="text-xs font-black uppercase tracking-wider text-gray-500">Ordenar por</h4>
+        <select name="orden" class="w-full p-2 border border-gray-300 rounded-lg bg-white text-sm focus:ring-2 focus:ring-[#1D4E3A] outline-none text-[#3D2B1F]">
+            <option value="precio_asc">Cuota (Más Baja)</option>
+            <option value="precio_desc">Cuota (Más Alta)</option>
+            <option value="edad">Edad (Menor a Mayor)</option>
+            <option value="nombre">Nombre (A-Z)</option>
+        </select>
+        </div>
+
+        <button type="submit" class="w-full bg-[#1D4E3A] hover:bg-[#153a2b] text-white font-bold py-3 rounded-lg transition-colors uppercase tracking-widest text-xs shadow-lg active:scale-[0.98]">
+        Aplicar Filtros
+        </button>
+    </form>
+  </div>
+</aside>
+      
+  </main>
 
 {% endblock %}
