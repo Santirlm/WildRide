@@ -1,70 +1,41 @@
 const express = require('express');
 const router = express.Router();
 const Caballo = require('../models/caballo');
+const multer = require('multer');
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/uploads');
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + "_" + file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // GET /caballos — listado con búsqueda, filtros y ordenación
 router.get('/', async (req, res) => {
     try {
-        const { nombre, sexo, edad, premioMin, orden } = req.query;
+        const caballos = await Caballo.find();
 
-        // ── Construir filtro para MongoDB ──
-        let filtro = {};
+        // Filtros vacíos por defecto para que la plantilla no falle
+        const filtros = {
+            nombre: req.query.nombre || '',
+            sexo: req.query.sexo ? [].concat(req.query.sexo) : [],
+            edad: req.query.edad ? [].concat(req.query.edad) : [],
+            premioMin: req.query.premioMin || '',
+            orden: req.query.orden || 'nombre'
+        };
 
-        // Búsqueda por nombre (insensible a mayúsculas)
-        if (nombre) {
-            filtro.nombre = { $regex: nombre, $options: 'i' };
-        }
-
-        // Filtro por sexo (puede venir uno o varios: ?sexo=yegua&sexo=semental)
-        if (sexo) {
-            const sexoArray = Array.isArray(sexo) ? sexo : [sexo];
-            filtro.sexo = { $in: sexoArray };
-        }
-
-        // Filtro por rango de edad
-        if (edad) {
-            const edadArray = Array.isArray(edad) ? edad : [edad];
-            let condicionesEdad = [];
-            if (edadArray.includes('2-3')) condicionesEdad.push({ edad: { $gte: 2, $lte: 3 } });
-            if (edadArray.includes('4-5')) condicionesEdad.push({ edad: { $gte: 4, $lte: 5 } });
-            if (edadArray.includes('6+'))  condicionesEdad.push({ edad: { $gte: 6 } });
-            if (condicionesEdad.length > 0) filtro.$or = condicionesEdad;
-        }
-
-        // Filtro por premio mínimo
-        if (premioMin) {
-            filtro.premio = { $gte: Number(premioMin) };
-        }
-
-        // ── Ordenación ──
-        let ordenMongo = {};
-        switch (orden) {
-            case 'premio_asc':  ordenMongo = { premio: 1 };  break;
-            case 'premio_desc': ordenMongo = { premio: -1 }; break;
-            case 'edad_asc':    ordenMongo = { edad: 1 };    break;
-            default:            ordenMongo = { nombre: 1 };  // A-Z por defecto
-        }
-
-        const caballos = await Caballo.find(filtro).sort(ordenMongo);
-
-        // ── Renderizar vista ──
-        res.render('caballos_listado.njk', {
-            caballos,
-            paginaActual: 'caballos',
-            filtros: {
-                nombre:   nombre   || '',
-                sexo:     Array.isArray(sexo) ? sexo : (sexo ? [sexo] : []),
-                edad:     Array.isArray(edad) ? edad : (edad ? [edad] : []),
-                premioMin: premioMin || '',
-                orden:    orden    || 'nombre'
-            }
-        });
-
+        res.render('caballos_listado.njk', { caballos, filtros });
     } catch (err) {
-        console.error(err);
-        res.status(500).render('error.njk', { mensaje: 'Error interno del servidor' });
+        res.status(500).json({ error: "Error interno del servidor", result: null });
     }
 });
+//Filtros
+
+
 
 // GET /caballos/:id — detalle de un caballo
 router.get('/:id', async (req, res) => {
@@ -72,9 +43,31 @@ router.get('/:id', async (req, res) => {
         const caballo = await Caballo.findById(req.params.id);
         if (!caballo) return res.status(404).render('error.njk', { mensaje: 'Caballo no encontrado' });
 
-        res.render('caballos_detalle.njk', { caballo, paginaActual: 'caballos' });
+        res.render('caballos_ficha.njk', { caballo, paginaActual: 'caballos' });
     } catch (err) {
         res.status(500).render('error.njk', { mensaje: 'Error interno del servidor' });
+    }
+});
+
+
+//Insertar caballos
+router.post('/', upload.single('imagen'), async (req, res) => {
+    try {
+        const { nombre, raza, sexo, jinete, premio } = req.body;
+
+        if (!nombre || !raza || !sexo || !jinete || !premio) {
+            return res.status(400).json({ error: "Faltan campos", result: null });
+        }
+
+        // Si se subió imagen, guarda la ruta; si no, null
+        const imagen = req.file ? '/uploads/' + req.file.filename : null;
+
+        const newHorse = new Caballo({ ...req.body, imagen });
+        await newHorse.save();
+
+        res.status(201).json({ error: null, result: newHorse });
+    } catch (err) {
+        res.status(500).json({ error: "Error interno", result: null });
     }
 });
 

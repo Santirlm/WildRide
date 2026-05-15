@@ -1,17 +1,179 @@
 {% extends "base.njk" %}
 
-{% block titulo %}Caballos | Ficha{% endblock %}
+{% block titulo %}{{ caballo.nombre }} | Wild Ride{% endblock %}
+
+{% block estilos %}
+<style>
+    .progress-bar { background: rgba(255,255,255,0.06); border-radius: 99px; height: 6px; overflow: hidden; }
+    .progress-fill { height: 100%; background: linear-gradient(90deg, #1D4E3A, #5dd99b); border-radius: 99px; }
+    .stat-box { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px 18px; }
+    .badge-yegua    { background: #7c3d7c22; color: #d88fe0; border: 1px solid #7c3d7c55; }
+    .badge-semental { background: #1D4E3A33; color: #5dd99b; border: 1px solid #1D4E3A66; }
+    .badge-capon    { background: #3d2b1f55; color: #d4a97a; border: 1px solid #3d2b1f88; }
+    .filtro-input:focus { outline: none; border-color: #C9A84C; box-shadow: 0 0 0 3px rgba(201,168,76,.15); }
+</style>
+{% endblock %}
 
 {% block contenido %}
-    <body class= "">
-        
 
+<!-- HERO -->
+<header class="relative h-56 overflow-hidden">
+    <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-fondo z-10"></div>
+    {% if caballo.imagen %}
+        <img src="{{ caballo.imagen }}" class="w-full h-full object-cover" alt="{{ caballo.nombre }}">
+    {% else %}
+        <img src="https://images.unsplash.com/photo-1553284965-5dd2e64a01c5?auto=format&fit=crop&q=80&w=1400"
+             class="w-full h-full object-cover object-[center_30%]" alt="Caballo">
+    {% endif %}
+    <div class="relative z-20 max-w-5xl mx-auto h-full flex flex-col justify-end px-6 pb-8">
+        <p class="text-dorado text-xs font-bold uppercase tracking-widest mb-2">
+            <i class="bi bi-broadcast-pin animate-pulse"></i> En carrera · Gran Premio de Madrid
+        </p>
+        <div class="flex items-end gap-4 flex-wrap">
+            <h1 class="font-display text-5xl font-black italic text-white uppercase leading-none">
+                {{ caballo.nombre }}
+            </h1>
+            <span class="text-xs font-bold px-3 py-1 rounded-full capitalize mb-1
+                {% if caballo.sexo == 'yegua' %}badge-yegua
+                {% elif caballo.sexo == 'semental' %}badge-semental
+                {% else %}badge-capon{% endif %}">
+                {{ caballo.sexo }}
+            </span>
+        </div>
+    </div>
+</header>
 
-    </body>
-    <h1>Ficha de un contacto</h1>
+<!-- BREADCRUMB -->
+<div class="max-w-5xl mx-auto px-6 py-3 text-xs text-crema/30 flex items-center gap-2">
+    <a href="/" class="hover:text-dorado transition">Inicio</a>
+    <i class="bi bi-chevron-right text-[10px]"></i>
+    <a href="/caballos" class="hover:text-dorado transition">Caballos</a>
+    <i class="bi bi-chevron-right text-[10px]"></i>
+    <span class="text-dorado">{{ caballo.nombre }}</span>
+</div>
 
-    <p><strong>Nombre:</strong> {{ contacto.nombre }}</p>
-    <p><strong>Edad:</strong> {{ contacto.edad }}</p>
-    <p><strong>Teléfono:</strong> {{ contacto.telefono }}</p>
+<!-- CUERPO -->
+<div class="max-w-5xl mx-auto px-6 pb-16 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
+
+    <!-- Columna izquierda -->
+    <div class="space-y-5">
+
+        <!-- Datos principales -->
+        <div class="bg-carta border border-borde rounded-2xl p-7">
+            <p class="text-xs font-bold uppercase tracking-widest text-crema/30 mb-5">
+                <i class="bi bi-info-circle text-dorado mr-1"></i> Datos del participante
+            </p>
+            <div class="grid grid-cols-3 gap-3">
+                <div class="stat-box">
+                    <span class="block text-[11px] text-crema/20 uppercase tracking-wider mb-1">Raza</span>
+                    <span class="text-crema font-bold">{{ caballo.raza }}</span>
+                </div>
+                <div class="stat-box">
+                    <span class="block text-[11px] text-crema/20 uppercase tracking-wider mb-1">Edad</span>
+                    <span class="text-crema font-bold">{{ caballo.edad }} años</span>
+                </div>
+                <div class="stat-box">
+                    <span class="block text-[11px] text-crema/20 uppercase tracking-wider mb-1">Premio</span>
+                    <span class="text-dorado font-bold">{{ caballo.premio }}€</span>
+                </div>
+            </div>
+
+            <div class="mt-5 pt-5 border-t border-borde">
+                <span class="block text-[11px] text-crema/20 uppercase tracking-wider mb-2">Jinete</span>
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-bosque/30 border border-bosque2/50 flex items-center justify-center text-sm font-bold text-verde">
+                        {{ caballo.jinete[0] | upper }}
+                    </div>
+                    <span class="text-crema">{{ caballo.jinete }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Descripción -->
+        {% if caballo.descripcion %}
+        <div class="bg-carta border border-borde rounded-2xl p-7">
+            <p class="text-xs font-bold uppercase tracking-widest text-crema/30 mb-4">
+                <i class="bi bi-card-text text-dorado mr-1"></i> Sobre el caballo
+            </p>
+            <p class="text-crema/60 text-sm leading-relaxed">{{ caballo.descripcion }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Rendimiento (decorativo de momento) -->
+        <div class="bg-carta border border-borde rounded-2xl p-7">
+            <p class="text-xs font-bold uppercase tracking-widest text-crema/30 mb-5">
+                <i class="bi bi-bar-chart text-dorado mr-1"></i> Rendimiento
+            </p>
+            <div class="space-y-4">
+                {% for stat in [['Velocidad', 87], ['Resistencia', 73], ['Experiencia', 91]] %}
+                <div>
+                    <div class="flex justify-between text-xs text-crema/40 mb-2">
+                        <span>{{ stat[0] }}</span>
+                        <span class="text-verde">{{ stat[1] }}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: {{ stat[1] }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Columna derecha: APOSTAR -->
+    <div class="space-y-4">
+
+        <!-- Card apuesta -->
+        <div class="bg-carta border border-dorado/20 rounded-2xl p-6 lg:sticky lg:top-24">
+            <p class="text-xs text-crema/30 uppercase tracking-widest mb-1">Premio acumulado</p>
+            <p class="font-display text-4xl font-black italic text-dorado leading-none">{{ caballo.premio }}€</p>
+            <p class="text-xs text-crema/20 mt-1 mb-5">Gran Premio de Madrid · 2025</p>
+
+            <div class="border-t border-borde pt-4 mb-5 space-y-3 text-sm">
+                <div class="flex justify-between text-crema/40">
+                    <span>Cuota actual</span>
+                    <span class="text-crema font-bold">3.2x</span>
+                </div>
+                <div class="flex justify-between text-crema/40">
+                    <span>Participantes</span>
+                    <span class="text-crema font-bold">12 caballos</span>
+                </div>
+                <div class="flex justify-between text-crema/40">
+                    <span>Estado</span>
+                    <span class="text-verde font-bold">● Abierto</span>
+                </div>
+            </div>
+
+            <form action="/apuestas" method="POST" class="space-y-3">
+                <input type="hidden" name="caballo_id" value="{{ caballo._id }}">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/30 mb-2">
+                        Tu apuesta (€)
+                    </label>
+                    <input
+                        type="number"
+                        name="cantidad"
+                        min="1"
+                        placeholder="Ej: 50"
+                        class="filtro-input w-full bg-fondo border border-borde rounded-xl px-4 py-3 text-crema text-sm placeholder-crema/20 transition-all"
+                    >
+                </div>
+                <button
+                    type="submit"
+                    class="w-full bg-dorado hover:bg-dorado2 text-tierra font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm shadow-lg active:scale-95"
+                >
+                    <i class="bi bi-lightning-fill mr-1"></i> ¡ Apostar ahora !
+                </button>
+            </form>
+
+            <a href="/caballos"
+               class="block text-center mt-3 text-xs text-crema/25 hover:text-crema/50 uppercase tracking-widest transition">
+                ← Volver al catálogo
+            </a>
+        </div>
+
+    </div>
+</div>
 
 {% endblock %}
