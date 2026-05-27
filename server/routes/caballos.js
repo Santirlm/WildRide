@@ -17,16 +17,48 @@ const upload = multer({ storage: storage });
 // GET /caballos — listado con búsqueda, filtros y ordenación
 router.get('/', async (req, res) => {
     try {
-        const caballos = await Caballo.find();
+        
 
         // Filtros vacíos por defecto para que la plantilla no falle
         const filtros = {
-            nombre: req.query.nombre || '',
+            nombre: req.query.nombre || '' ,
             sexo: req.query.sexo ? [].concat(req.query.sexo) : [],
             edad: req.query.edad ? [].concat(req.query.edad) : [],
             premioMin: req.query.premioMin || '',
             orden: req.query.orden || 'nombre'
         };
+
+        let query = {};
+
+        // Filtro por nombre (usando expresión regular para que busque "contiene" y sea insensible a mayúsculas)
+        if (filtros.nombre) {
+            query.nombre = { $regex: filtros.nombre, $options: 'i' };
+        }
+
+        // Filtro por sexo (usamos $in porque puede ser un array con varios sexos elegidos)
+        if (filtros.sexo.length > 0) {
+            query.sexo = { $in: filtros.sexo };
+        }
+
+        // Filtro por edad
+        if (filtros.edad.length > 0) {
+            query.edad = { $in: filtros.edad.map(Number) }; // Convertimos a número por si vienen como texto
+        }
+
+        // Filtro por premio mínimo ($gte significa "mayor o igual que")
+        if (filtros.premioMin) {
+            query.premio = { $gte: Number(filtros.premioMin) };
+        }
+
+        // 3. Ejecutamos la búsqueda en la Base de Datos aplicando la query y el orden
+        // .sort() se encarga de ordenar (ej: 'nombre' o '-nombre' si fuera descendente)
+        const caballos = await Caballo.find(query).sort(filtros.orden);
+
+        // 4. Renderizamos la vista de Nunjucks
+        if (caballos.length === 0) {
+            // Pasamos un array vacío o un mensaje a la vista, es mejor que un 404 en JSON
+            return res.render('caballos_listado', { result: [], mensaje: "No se encontraron caballos con esos filtros" });
+        }
 
         res.render('caballos_listado.njk', { caballos, filtros });
     } catch (err) {
