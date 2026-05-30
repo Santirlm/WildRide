@@ -11,6 +11,21 @@
     .badge-semental { background: #1D4E3A33; color: #5dd99b; border: 1px solid #1D4E3A66; }
     .badge-capon    { background: #3d2b1f55; color: #d4a97a; border: 1px solid #3d2b1f88; }
     .filtro-input:focus { outline: none; border-color: #C9A84C; box-shadow: 0 0 0 3px rgba(201,168,76,.15); }
+    .campo-comentario {
+        background: #0a1f16;
+        border: 1px solid #1a4a2e;
+        color: #F5EFE0;
+        border-radius: 0.75rem;
+        padding: 0.625rem 1rem;
+        width: 100%;
+        font-size: 0.875rem;
+        transition: border-color .2s, box-shadow .2s;
+        font-family: 'DM Sans', sans-serif;
+    }
+    .campo-comentario:focus { outline: none; border-color: #C9A84C; box-shadow: 0 0 0 3px rgba(201,168,76,.15); }
+    .campo-comentario::placeholder { color: rgba(245,239,224,.2); }
+    .card-rec { transition: transform .2s ease, box-shadow .2s ease; }
+    .card-rec:hover { transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,.4), 0 0 0 1px rgba(201,168,76,.2); }
 </style>
 {% endblock %}
 
@@ -99,7 +114,7 @@
         </div>
         {% endif %}
 
-        <!-- Rendimiento (decorativo de momento) -->
+        <!-- Rendimiento -->
         <div class="bg-carta border border-borde rounded-2xl p-7">
             <p class="text-xs font-bold uppercase tracking-widest text-crema/30 mb-5">
                 <i class="bi bi-bar-chart text-dorado mr-1"></i> Rendimiento
@@ -119,12 +134,108 @@
             </div>
         </div>
 
+        <!-- COMENTARIOS -->
+        <div class="bg-carta border border-borde rounded-2xl p-7">
+            <div class="flex items-center justify-between mb-6">
+                <p class="text-xs font-bold uppercase tracking-widest text-crema/30">
+                    <i class="bi bi-chat-dots text-dorado mr-1"></i> Comentarios
+                </p>
+                <span class="text-xs text-crema/20">{{ comentarios | length }} comentario{% if comentarios | length != 1 %}s{% endif %}</span>
+            </div>
+
+            {% if msgComentario == 'ok' %}
+            <div class="flex items-center gap-2 bg-bosque/40 border border-bosque text-white text-xs px-4 py-2.5 rounded-xl mb-5">
+                <i class="bi bi-check-circle-fill text-green-400"></i> Tu comentario se ha publicado.
+            </div>
+            {% elif msgComentario == 'error' %}
+            <div class="flex items-center gap-2 bg-red-900/30 border border-red-700/50 text-white text-xs px-4 py-2.5 rounded-xl mb-5">
+                <i class="bi bi-exclamation-triangle-fill text-red-400"></i> Ha habido un error. Revisa los campos.
+            </div>
+            {% endif %}
+
+            <form action="/caballos/{{ caballo._id }}/comentario" method="POST" class="space-y-3 mb-8 pb-8 border-b border-borde">
+                <p class="text-xs font-bold uppercase tracking-widest text-crema/40 mb-3">Deja tu opinión</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs text-crema/30 mb-1.5">Tu nick *</label>
+                        <input type="text" name="nick" required minlength="2" maxlength="30"
+                               placeholder="Ej: jinete22" class="campo-comentario">
+                    </div>
+                    <div class="sm:col-span-1">
+                        <label class="block text-xs text-crema/30 mb-1.5">Comentario *</label>
+                        <textarea name="texto" required minlength="5" maxlength="500" rows="2"
+                                  placeholder="¿Qué opinas de este caballo?"
+                                  class="campo-comentario resize-none"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end">
+                    <button type="submit"
+                            class="bg-dorado hover:bg-dorado2 text-tierra font-black px-6 py-2.5 rounded-xl transition-all uppercase tracking-widest text-xs active:scale-95">
+                        <i class="bi bi-send mr-1"></i> Publicar
+                    </button>
+                </div>
+            </form>
+
+            {% if comentarios | length == 0 %}
+            <div class="flex flex-col items-center py-8 text-center">
+                <i class="bi bi-chat text-3xl text-borde mb-3"></i>
+                <p class="text-crema/20 text-sm">Sé el primero en comentar.</p>
+            </div>
+            {% else %}
+            <div class="space-y-4">
+                {% for c in comentarios %}
+                <div class="flex gap-4">
+                    <div class="w-9 h-9 rounded-full bg-bosque/40 border border-bosque2 flex items-center justify-center text-sm font-black text-dorado flex-shrink-0 mt-0.5">
+                        {{ c.nick[0] | upper }}
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-baseline gap-2 mb-1">
+                            <span class="font-bold text-sm text-crema">{{ c.nick }}</span>
+                            <span class="text-[11px] text-crema/20">
+                                {{ c.fecha | date("DD/MM/YYYY HH:mm") if c.fecha else '' }}
+                            </span>
+                        </div>
+                        <p class="text-crema/60 text-sm leading-relaxed">{{ c.texto }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- RECOMENDACIONES -->
+        {% if recomendaciones | length > 0 %}
+        <div class="bg-carta border border-borde rounded-2xl p-7">
+            <p class="text-xs font-bold uppercase tracking-widest text-crema/30 mb-5">
+                <i class="bi bi-stars text-dorado mr-1"></i> También te puede interesar
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {% for rec in recomendaciones %}
+                <a href="/caballos/{{ rec._id }}" class="card-rec bg-fondo border border-borde rounded-xl overflow-hidden block">
+                    <div class="h-28 overflow-hidden">
+                        {% if rec.imagen %}
+                        <img src="{{ rec.imagen }}" class="w-full h-full object-cover" alt="{{ rec.nombre }}">
+                        {% else %}
+                        <div class="w-full h-full bg-bosque/20 flex items-center justify-center">
+                            <i class="bi bi-image text-2xl text-borde"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="p-3">
+                        <p class="font-display font-black italic text-white text-sm uppercase leading-tight">{{ rec.nombre }}</p>
+                        <p class="text-crema/30 text-xs mt-0.5">{{ rec.raza }}</p>
+                        <p class="text-dorado text-xs font-bold mt-1">{{ rec.premio }}€</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 
     <!-- Columna derecha: APOSTAR -->
     <div class="space-y-4">
-
-        <!-- Card apuesta -->
         <div class="bg-carta border border-dorado/20 rounded-2xl p-6 lg:sticky lg:top-24">
             <p class="text-xs text-crema/30 uppercase tracking-widest mb-1">Premio acumulado</p>
             <p class="font-display text-4xl font-black italic text-dorado leading-none">{{ caballo.premio }}€</p>
@@ -151,18 +262,11 @@
                     <label class="block text-xs font-bold uppercase tracking-widest text-crema/30 mb-2">
                         Tu apuesta (€)
                     </label>
-                    <input
-                        type="number"
-                        name="cantidad"
-                        min="1"
-                        placeholder="Ej: 50"
-                        class="filtro-input w-full bg-fondo border border-borde rounded-xl px-4 py-3 text-crema text-sm placeholder-crema/20 transition-all"
-                    >
+                    <input type="number" name="cantidad" min="1" placeholder="Ej: 50"
+                           class="filtro-input w-full bg-fondo border border-borde rounded-xl px-4 py-3 text-crema text-sm placeholder-crema/20 transition-all">
                 </div>
-                <button
-                    type="submit"
-                    class="w-full bg-dorado hover:bg-dorado2 text-tierra font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm shadow-lg active:scale-95"
-                >
+                <button type="submit"
+                        class="w-full bg-dorado hover:bg-dorado2 text-tierra font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm shadow-lg active:scale-95">
                     <i class="bi bi-lightning-fill mr-1"></i> ¡ Apostar ahora !
                 </button>
             </form>
@@ -172,7 +276,6 @@
                 ← Volver al catálogo
             </a>
         </div>
-
     </div>
 </div>
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Caballo = require('../models/caballo');
+const Comentario = require('../models/comentario');
 const multer = require('multer');
 
 const storage = multer.diskStorage({
@@ -17,11 +18,8 @@ const upload = multer({ storage: storage });
 // GET /caballos — listado con búsqueda, filtros y ordenación
 router.get('/', async (req, res) => {
     try {
-        
-
-        // Filtros vacíos por defecto para que la plantilla no falle
         const filtros = {
-            nombre: req.query.nombre || '' ,
+            nombre: req.query.nombre || '',
             sexo: req.query.sexo ? [].concat(req.query.sexo) : [],
             edad: req.query.edad ? [].concat(req.query.edad) : [],
             premioMin: req.query.premioMin || '',
@@ -30,59 +28,83 @@ router.get('/', async (req, res) => {
 
         let query = {};
 
-        // Filtro por nombre (usando expresión regular para que busque "contiene" y sea insensible a mayúsculas)
         if (filtros.nombre) {
             query.nombre = { $regex: filtros.nombre, $options: 'i' };
         }
-
-        // Filtro por sexo (usamos $in porque puede ser un array con varios sexos elegidos)
         if (filtros.sexo.length > 0) {
             query.sexo = { $in: filtros.sexo };
         }
-
-        // Filtro por edad
         if (filtros.edad.length > 0) {
-            query.edad = { $in: filtros.edad.map(Number) }; // Convertimos a número por si vienen como texto
+            query.edad = { $in: filtros.edad.map(Number) };
         }
-
-        // Filtro por premio mínimo ($gte significa "mayor o igual que")
         if (filtros.premioMin) {
             query.premio = { $gte: Number(filtros.premioMin) };
         }
 
-        // 3. Ejecutamos la búsqueda en la Base de Datos aplicando la query y el orden
-        // .sort() se encarga de ordenar (ej: 'nombre' o '-nombre' si fuera descendente)
-        const caballos = await Caballo.find(query).sort(filtros.orden);
+        const ordenMap = {
+            'nombre':      { nombre: 1 },
+            'premio_asc':  { premio: 1 },
+            'premio_desc': { premio: -1 },
+            'edad_asc':    { edad: 1 }
+        };
+        const sortObj = ordenMap[filtros.orden] || { nombre: 1 };
 
-        // 4. Renderizamos la vista de Nunjucks
-        if (caballos.length === 0) {
-            // Pasamos un array vacío o un mensaje a la vista, es mejor que un 404 en JSON
-            return res.render('caballos_listado', { result: [], mensaje: "No se encontraron caballos con esos filtros" });
-        }
+        const caballos = await Caballo.find(query).sort(sortObj);
 
-        res.render('caballos_listado.njk', { caballos, filtros });
+        // siempre pasamos filtros aunque no haya resultados
+        res.render('caballos_listado', { caballos, filtros, paginaActual: 'caballos' });
+
     } catch (err) {
         res.status(500).json({ error: "Error interno del servidor", result: null });
     }
 });
-//Filtros
 
-
-
-// GET /caballos/:id — detalle de un caballo
+// GET /caballos/:id — ficha detalle con comentarios y recomendaciones
 router.get('/:id', async (req, res) => {
     try {
         const caballo = await Caballo.findById(req.params.id);
-        if (!caballo) return res.status(404).render('error.njk', { mensaje: 'Caballo no encontrado' });
+        if (!caballo) return res.status(404).render('error', { mensaje: 'Caballo no encontrado' });
 
-        res.render('caballos_ficha.njk', { caballo, paginaActual: 'caballos' });
+        // comentarios ordenados de más reciente a más antiguo
+        const comentarios = await Comentario.find({ caballo: req.params.id }).sort({ fecha: -1 });
+
+        // 3 recomendaciones aleatorias (distintas al actual)
+        const recomendaciones = await Caballo.aggregate([
+            { $match: { _id: { $ne: caballo._id } } },
+            { $sample: { size: 3 } }
+        ]);
+
+        const msgComentario = req.query.msgComentario || null;
+
+        res.render('caballos_ficha', { caballo, comentarios, recomendaciones, msgComentario, paginaActual: 'caballos' });
     } catch (err) {
-        res.status(500).render('error.njk', { mensaje: 'Error interno del servidor' });
+        res.status(500).render('error', { mensaje: 'Error interno del servidor' });
     }
 });
 
+// POST /caballos/:id/comentario — añadir comentario
+router.post('/:id/comentario', async (req, res) => {
+    try {
+        const { nick, texto } = req.body;
 
-//Insertar caballos
+        if (!nick || !texto) {
+            return res.redirect(`/caballos/${req.params.id}?msgComentario=error`);
+        }
+
+        const nuevoComentario = new Comentario({
+            caballo: req.params.id,
+            nick: nick.trim(),
+            texto: texto.trim()
+        });
+        await nuevoComentario.save();
+
+        res.redirect(`/caballos/${req.params.id}?msgComentario=ok`);
+    } catch (err) {
+        res.redirect(`/caballos/${req.params.id}?msgComentario=error`);
+    }
+});
+
+// POST /caballos — insertar caballo (ruta de Mireya, la dejamos igual)
 router.post('/', upload.single('imagen'), async (req, res) => {
     try {
         const { nombre, raza, sexo, jinete, premio } = req.body;
@@ -91,9 +113,7 @@ router.post('/', upload.single('imagen'), async (req, res) => {
             return res.status(400).json({ error: "Faltan campos", result: null });
         }
 
-        // Si se subió imagen, guarda la ruta; si no, null
         const imagen = req.file ? '/uploads/' + req.file.filename : null;
-
         const newHorse = new Caballo({ ...req.body, imagen });
         await newHorse.save();
 
