@@ -2,10 +2,13 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const nunjucks = require('nunjucks');
+const methodOverride = require('method-override');
+const path = require('path');
 
 //Enrutadores
 const caballos = require('./routes/caballos');
 const auth = require('./routes/auth');
+const admin = require('./routes/admin');
 
 //Conexión con la BD
 mongoose.connect('mongodb://127.0.0.1:27017/wildride')
@@ -15,8 +18,8 @@ mongoose.connect('mongodb://127.0.0.1:27017/wildride')
 //Servidor Express
 let app = express();
 
-//Configuramos motor Nunjucks
-nunjucks.configure('views', {
+//Configuramos motor Nunjucks (ruta absoluta para que funcione desde cualquier directorio)
+nunjucks.configure(path.join(__dirname, 'views'), {
     autoescape: true,
     express: app
 });
@@ -24,15 +27,16 @@ nunjucks.configure('views', {
 //Asignación del motor de plantillas
 app.set('view engine', 'njk');
 
-// Middleware para peticiones POST y PUT
-// Middleware para estilos Bootstrap
-// Enrutadores para cada grupo de rutas
+//Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method')); //para PUT y DELETE desde formularios html
 app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/node_modules/bootstrap/dist'));
 
+//Enrutadores
 app.use('/caballos', caballos);
+app.use('/admin', admin);
 
 // Puesta en marcha del servidor
 app.listen(8080);

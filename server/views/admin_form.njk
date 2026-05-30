@@ -1,0 +1,147 @@
+{% extends "base.njk" %}
+
+{% block titulo %}
+    {% if accion == 'editar' %}Editar {{ caballo.nombre }}{% else %}Nuevo caballo{% endif %} | Admin
+{% endblock %}
+
+{% block estilos %}
+<style>
+    .campo-input {
+        background: #0a1f16;
+        border: 1px solid #1a4a2e;
+        color: #F5EFE0;
+        border-radius: 0.75rem;
+        padding: 0.625rem 1rem;
+        width: 100%;
+        font-size: 0.875rem;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .campo-input:focus {
+        outline: none;
+        border-color: #C9A84C;
+        box-shadow: 0 0 0 3px rgba(201,168,76,.15);
+    }
+    .campo-input::placeholder { color: rgba(245,239,224,.2); }
+    select.campo-input option { background: #0f2d1e; }
+</style>
+{% endblock %}
+
+{% block contenido %}
+
+<div class="max-w-3xl mx-auto px-6 pt-8 pb-4">
+    <div class="flex items-center gap-3 mb-1">
+        <a href="/admin" class="text-crema/30 hover:text-dorado transition text-sm">
+            <i class="bi bi-arrow-left mr-1"></i>Volver al panel
+        </a>
+    </div>
+    <h1 class="font-display text-3xl font-black italic text-white mt-3">
+        {% if accion == 'editar' %}Editar caballo{% else %}Nuevo caballo{% endif %}
+    </h1>
+    <p class="text-crema/40 text-sm mt-1">
+        {% if accion == 'editar' %}Modifica los datos de {{ caballo.nombre }}{% else %}Rellena los datos del nuevo participante{% endif %}
+    </p>
+</div>
+
+<div class="max-w-3xl mx-auto px-6 pb-16">
+    <div class="bg-carta border border-borde rounded-2xl p-8">
+
+        {% if accion == 'editar' %}
+        <form action="/admin/{{ caballo._id }}?_method=PUT" method="POST" enctype="multipart/form-data">
+        {% else %}
+        <form action="/admin" method="POST" enctype="multipart/form-data">
+        {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Nombre *</label>
+                    <input type="text" name="nombre" required minlength="2" maxlength="35"
+                           value="{% if caballo %}{{ caballo.nombre }}{% endif %}"
+                           placeholder="Ej: Relámpago" class="campo-input">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Raza *</label>
+                    <input type="text" name="raza" required minlength="2" maxlength="20"
+                           value="{% if caballo %}{{ caballo.raza }}{% endif %}"
+                           placeholder="Ej: Pura Sangre" class="campo-input">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Sexo *</label>
+                    <select name="sexo" required class="campo-input">
+                        <option value="" disabled {% if not caballo %}selected{% endif %}>Selecciona...</option>
+                        <option value="yegua"    {% if caballo and caballo.sexo == 'yegua' %}selected{% endif %}>Yegua</option>
+                        <option value="semental" {% if caballo and caballo.sexo == 'semental' %}selected{% endif %}>Semental</option>
+                        <option value="capón"    {% if caballo and caballo.sexo == 'capón' %}selected{% endif %}>Capón</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Jinete *</label>
+                    <input type="text" name="jinete" required
+                           value="{% if caballo %}{{ caballo.jinete }}{% endif %}"
+                           placeholder="Ej: Carlos López" class="campo-input">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Edad (años)</label>
+                    <input type="number" name="edad" min="1"
+                           value="{% if caballo %}{{ caballo.edad }}{% endif %}"
+                           placeholder="Ej: 4" class="campo-input">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Premio (€) *</label>
+                    <input type="number" name="premio" required min="0"
+                           value="{% if caballo %}{{ caballo.premio }}{% endif %}"
+                           placeholder="Ej: 50000" class="campo-input">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Victorias</label>
+                    <input type="number" name="victorias" min="0"
+                           value="{% if caballo %}{{ caballo.victorias }}{% else %}0{% endif %}"
+                           class="campo-input">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Imagen</label>
+                    {% if caballo and caballo.imagen %}
+                    <div class="flex items-center gap-3 mb-2">
+                        <img src="{{ caballo.imagen }}" class="w-12 h-12 rounded-lg object-cover" alt="imagen actual">
+                        <span class="text-crema/30 text-xs">Sube otra para reemplazarla</span>
+                    </div>
+                    {% endif %}
+                    <input type="file" name="imagen" accept="image/*" class="campo-input py-2 cursor-pointer file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:bg-bosque file:text-crema/70">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Descripción</label>
+                    <textarea name="descripcion" maxlength="200" rows="3"
+                              placeholder="Breve descripción del caballo..."
+                              class="campo-input resize-none">{% if caballo %}{{ caballo.descripcion }}{% endif %}</textarea>
+                </div>
+
+            </div>
+
+            <div class="flex items-center gap-3 mt-8 pt-6 border-t border-borde">
+                <button type="submit"
+                        class="bg-dorado hover:bg-dorado2 text-tierra font-black px-8 py-3 rounded-xl transition-all uppercase tracking-widest text-sm shadow-lg active:scale-95">
+                    {% if accion == 'editar' %}
+                        <i class="bi bi-check-lg mr-1"></i>Guardar cambios
+                    {% else %}
+                        <i class="bi bi-plus-lg mr-1"></i>Crear caballo
+                    {% endif %}
+                </button>
+                <a href="/admin"
+                   class="border border-borde hover:border-dorado/40 text-crema/40 hover:text-crema/70 font-medium px-6 py-3 rounded-xl transition-all text-sm uppercase tracking-widest">
+                    Cancelar
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}

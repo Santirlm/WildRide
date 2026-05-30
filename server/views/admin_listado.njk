@@ -1,0 +1,118 @@
+{% extends "base.njk" %}
+
+{% block titulo %}Admin | Wild Ride{% endblock %}
+
+{% block estilos %}
+<style>
+    .btn-accion {
+        transition: background .2s, color .2s;
+    }
+    tr { transition: background .15s; }
+    tr:hover td { background: rgba(201,168,76,.06); }
+</style>
+{% endblock %}
+
+{% block contenido %}
+
+<!-- banner de exito/error -->
+{% if msg == 'ok' %}
+<div class="max-w-6xl mx-auto px-6 pt-6">
+    <div class="flex items-center gap-3 bg-bosque/40 border border-bosque text-white text-sm px-5 py-3 rounded-xl">
+        <i class="bi bi-check-circle-fill text-green-400"></i>
+        Operación realizada correctamente.
+    </div>
+</div>
+{% elif msg == 'error' %}
+<div class="max-w-6xl mx-auto px-6 pt-6">
+    <div class="flex items-center gap-3 bg-red-900/30 border border-red-700/50 text-white text-sm px-5 py-3 rounded-xl">
+        <i class="bi bi-exclamation-triangle-fill text-red-400"></i>
+        Ha ocurrido un error. Inténtalo de nuevo.
+    </div>
+</div>
+{% endif %}
+
+<!-- cabecera -->
+<div class="max-w-6xl mx-auto px-6 pt-8 pb-4 flex items-center justify-between flex-wrap gap-4">
+    <div>
+        <h1 class="font-display text-3xl font-black italic text-white">Panel de administración</h1>
+        <p class="text-crema/40 text-sm mt-1">{{ caballos | length }} caballos en el sistema</p>
+    </div>
+    <a href="/admin/nuevo"
+       class="flex items-center gap-2 bg-dorado hover:bg-dorado2 text-tierra font-bold px-6 py-3 rounded-xl transition-all text-sm uppercase tracking-widest active:scale-95">
+        <i class="bi bi-plus-lg"></i> Nuevo caballo
+    </a>
+</div>
+
+<!-- tabla -->
+<div class="max-w-6xl mx-auto px-6 pb-16">
+    <div class="bg-carta border border-borde rounded-2xl overflow-hidden">
+
+        {% if caballos | length == 0 %}
+        <div class="flex flex-col items-center justify-center py-20 text-center">
+            <i class="bi bi-inbox text-5xl text-borde mb-4"></i>
+            <p class="text-crema/30 text-sm">No hay caballos. Añade el primero.</p>
+        </div>
+
+        {% else %}
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="border-b border-borde text-xs uppercase tracking-widest text-crema/30">
+                    <th class="px-5 py-4 text-left">Nombre</th>
+                    <th class="px-5 py-4 text-left hidden md:table-cell">Raza</th>
+                    <th class="px-5 py-4 text-left hidden md:table-cell">Sexo</th>
+                    <th class="px-5 py-4 text-left hidden lg:table-cell">Jinete</th>
+                    <th class="px-5 py-4 text-left">Premio</th>
+                    <th class="px-5 py-4 text-right">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-borde">
+                {% for caballo in caballos %}
+                <tr>
+                    <td class="px-5 py-4">
+                        <div class="flex items-center gap-3">
+                            {% if caballo.imagen %}
+                            <img src="{{ caballo.imagen }}" class="w-9 h-9 rounded-lg object-cover flex-shrink-0" alt="{{ caballo.nombre }}">
+                            {% else %}
+                            <div class="w-9 h-9 rounded-lg bg-bosque/30 flex items-center justify-center flex-shrink-0">
+                                <i class="bi bi-image text-borde text-xs"></i>
+                            </div>
+                            {% endif %}
+                            <span class="font-bold text-white">{{ caballo.nombre }}</span>
+                        </div>
+                    </td>
+                    <td class="px-5 py-4 text-crema/50 hidden md:table-cell">{{ caballo.raza }}</td>
+                    <td class="px-5 py-4 hidden md:table-cell">
+                        <span class="text-xs px-2 py-1 rounded-full capitalize
+                            {% if caballo.sexo == 'yegua' %}bg-purple-900/30 text-purple-300
+                            {% elif caballo.sexo == 'semental' %}bg-bosque/40 text-green-300
+                            {% else %}bg-tierra/60 text-amber-300{% endif %}">
+                            {{ caballo.sexo }}
+                        </span>
+                    </td>
+                    <td class="px-5 py-4 text-crema/50 hidden lg:table-cell">{{ caballo.jinete }}</td>
+                    <td class="px-5 py-4 text-dorado font-bold">{{ caballo.premio }}€</td>
+                    <td class="px-5 py-4">
+                        <div class="flex items-center justify-end gap-2">
+                            <a href="/admin/editar/{{ caballo._id }}"
+                               class="btn-accion bg-bosque/40 hover:bg-bosque border border-borde hover:border-dorado/40 text-crema/70 hover:text-white px-3 py-1.5 rounded-lg text-xs font-medium">
+                                <i class="bi bi-pencil mr-1"></i>Editar
+                            </a>
+                            <form action="/admin/{{ caballo._id }}?_method=DELETE" method="POST"
+                                  onsubmit="return confirm('¿Seguro que quieres eliminar a {{ caballo.nombre }}?')">
+                                <button type="submit"
+                                        class="btn-accion bg-red-900/30 hover:bg-red-800/50 border border-red-800/40 hover:border-red-600/60 text-red-400 hover:text-red-300 px-3 py-1.5 rounded-lg text-xs font-medium">
+                                    <i class="bi bi-trash mr-1"></i>Borrar
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}
