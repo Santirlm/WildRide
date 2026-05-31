@@ -58,4 +58,4 @@ app.use('/auth', auth);
 app.use('/caballos', caballos);
 app.use('/admin', protegerRutas(['admin']), admin); 
 
-app.listen(8080, () => console.log('Servidor en http://localhost:8080'));
+app.listen(3000, () => console.log('Servidor en http://localhost:3000'));

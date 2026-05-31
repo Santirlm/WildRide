@@ -34,8 +34,22 @@ router.get('/', async (req, res) => {
         if (filtros.sexo.length > 0) {
             query.sexo = { $in: filtros.sexo };
         }
+       // Sustituye este bloque en tu router
         if (filtros.edad.length > 0) {
-            query.edad = { $in: filtros.edad.map(Number) };
+            const edades = [];
+
+            filtros.edad.forEach(rango => {
+                if (rango === '2-3') 
+                    edades.push(2, 3);
+                if (rango === '4-5') 
+                    edades.push(4, 5);
+                if (rango === '6+')
+                { 
+                    query.edad = { $gte: 6 };
+                }
+            });
+
+            query.edad = { $in: edades };
         }
         if (filtros.premioMin) {
             query.premio = { $gte: Number(filtros.premioMin) };

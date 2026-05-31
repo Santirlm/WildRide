@@ -35,10 +35,13 @@
 <header class="relative h-56 overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-fondo z-10"></div>
     {% if caballo.imagen %}
-        <img src="{{ caballo.imagen }}" class="w-full h-full object-cover" alt="{{ caballo.nombre }}">
+        <img src="{{ caballo.imagen }}" 
+             class="w-full h-56 object-cover object-center" 
+             alt="{{ caballo.nombre }}">
     {% else %}
-        <img src="https://images.unsplash.com/photo-1553284965-5dd2e64a01c5?auto=format&fit=crop&q=80&w=1400"
-             class="w-full h-full object-cover object-[center_30%]" alt="Caballo">
+        <img src="https://images.unsplash.com/..."
+             class="w-full h-56 object-cover object-[center_30%]" 
+             alt="Caballo">
     {% endif %}
     <div class="relative z-20 max-w-5xl mx-auto h-full flex flex-col justify-end px-6 pb-8">
         <p class="text-dorado text-xs font-bold uppercase tracking-widest mb-2">
@@ -58,7 +61,7 @@
     </div>
 </header>
 
-<!-- BREADCRUMB -->
+<!-- Enlaces de textos con flechitas -->
 <div class="max-w-5xl mx-auto px-6 py-3 text-xs text-crema/30 flex items-center gap-2">
     <a href="/" class="hover:text-dorado transition">Inicio</a>
     <i class="bi bi-chevron-right text-[10px]"></i>
@@ -67,7 +70,7 @@
     <span class="text-dorado">{{ caballo.nombre }}</span>
 </div>
 
-<!-- CUERPO -->
+<!-- body -->
 <div class="max-w-5xl mx-auto px-6 pb-16 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-6">
 
     <!-- Columna izquierda -->
@@ -234,7 +237,7 @@
 
     </div>
 
-    <!-- Columna derecha: APOSTAR -->
+    <!--  APOSTAR -->
     <div class="space-y-4">
         <div class="bg-carta border border-dorado/20 rounded-2xl p-6 lg:sticky lg:top-24">
             <p class="text-xs text-crema/30 uppercase tracking-widest mb-1">Premio acumulado</p>
@@ -256,27 +259,38 @@
                 </div>
             </div>
 
-            <form action="/apuestas" method="POST" class="space-y-3">
+            <form id="formApuesta" class="space-y-3">
                 <input type="hidden" name="caballo_id" value="{{ caballo._id }}">
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-widest text-crema/30 mb-2">
                         Tu apuesta (€)
                     </label>
                     <input type="number" name="cantidad" min="1" placeholder="Ej: 50"
-                           class="filtro-input w-full bg-fondo border border-borde rounded-xl px-4 py-3 text-crema text-sm placeholder-crema/20 transition-all">
+                        class="filtro-input w-full bg-fondo border border-borde rounded-xl px-4 py-3 text-crema text-sm placeholder-crema/20 transition-all">
                 </div>
-                <button type="submit"
-                        class="w-full bg-dorado hover:bg-dorado2 text-tierra font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm shadow-lg active:scale-95">
-                    <i class="bi bi-lightning-fill mr-1"></i> ¡ Apostar ahora !
-                </button>
+                <button id="btnApostar" type="button"
+        onclick="apostar()"
+        class="w-full bg-dorado hover:bg-dorado2 text-tierra font-black py-4 rounded-xl transition-all uppercase tracking-widest text-sm shadow-lg active:scale-95">
+    <i class="bi bi-lightning-fill mr-1"></i> ¡ Apostar ahora !
+</button>
             </form>
 
             <a href="/caballos"
                class="block text-center mt-3 text-xs text-crema/25 hover:text-crema/50 uppercase tracking-widest transition">
                 ← Volver al catálogo
             </a>
-        </div>
-    </div>
-</div>
+        <script>
+    function apostar() {
 
+        const btn = document.getElementById('btnApostar');
+        btn.innerHTML = '<i class="bi bi-check-lg mr-1"></i> ¡ Apuesta realizada !';
+        btn.classList.remove('bg-dorado', 'hover:bg-dorado2');
+        btn.classList.add('bg-green-700', 'cursor-default');
+        btn.disabled = true;
+    }
+    </script>
+
+</div>
+</div>
+</div>
 {% endblock %}

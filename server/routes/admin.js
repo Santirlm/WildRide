@@ -3,6 +3,20 @@ const router = express.Router();
 const Caballo = require('../models/caballo');
 const multer = require('multer');
 
+// Función que valida los campos y devuelve un array de errores
+function validarCaballo(body) {
+    const { nombre, raza, sexo, jinete, premio } = body;
+    const errores = [];
+
+    if (!nombre || nombre.trim().length < 2) errores.push('El nombre debe tener al menos 2 caracteres.');
+    if (!raza || raza.trim().length < 2) errores.push('La raza debe tener al menos 2 caracteres.');
+    if (!sexo) errores.push('El sexo es obligatorio.');
+    if (!jinete || jinete.trim().length === 0) errores.push('El jinete es obligatorio.');
+    if (!premio || Number(premio) <= 0) errores.push('El premio debe ser mayor de 0.');
+
+    return errores;
+}
+
 //configuracion de multer para subida de imagenes
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -45,6 +59,12 @@ module.exports = router;
 
 // POST /admin — crear caballo nuevo
 router.post('/', upload.single('imagen'), async (req, res) => {
+    const errores = validarCaballo(req.body);
+
+    if (errores.length > 0) {
+        return res.render('caballos_ficha.njk', { accion: 'crear', caballo: req.body, errores });
+    }
+
     try {
         const imagen = req.file ? '/uploads/' + req.file.filename : '';
         const nuevoCaballo = new Caballo({ ...req.body, imagen });
@@ -57,11 +77,16 @@ router.post('/', upload.single('imagen'), async (req, res) => {
 
 // PUT /admin/:id — actualizar un caballo existente
 router.put('/:id', upload.single('imagen'), async (req, res) => {
+    const errores = validarCaballo(req.body);
+
+    if (errores.length > 0) {
+        return res.render('caballos_ficha.njk', { accion: 'editar', caballo: { ...req.body, _id: req.params.id }, errores });
+    }
+
     try {
         const datos = { ...req.body };
         //si se sube nueva imagen la usamos, si no dejamos la que habia
         if (req.file) datos.imagen = '/uploads/' + req.file.filename;
-
         await Caballo.findByIdAndUpdate(req.params.id, datos);
         res.redirect('/admin?msg=ok');
     } catch (err) {

@@ -45,6 +45,20 @@
 <div class="max-w-3xl mx-auto px-6 pb-16">
     <div class="bg-carta border border-borde rounded-2xl p-8">
 
+        {# ── Errores que vienen del back-end ── #}
+        {% if errores and errores.length > 0 %}
+        <div class="mb-6 p-4 bg-red-950/50 border border-red-700/40 rounded-xl">
+            <p class="text-red-400 font-bold text-sm mb-2">
+                <i class="bi bi-exclamation-triangle-fill mr-1"></i>Corrige estos errores:
+            </p>
+            <ul class="list-disc list-inside space-y-1">
+                {% for error in errores %}
+                    <li class="text-red-300 text-sm">{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         {% if accion == 'editar' %}
         <form action="/admin/{{ caballo._id }}?_method=PUT" method="POST" enctype="multipart/form-data">
         {% else %}
@@ -71,9 +85,9 @@
                     <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Sexo *</label>
                     <select name="sexo" required class="campo-input">
                         <option value="" disabled {% if not caballo %}selected{% endif %}>Selecciona...</option>
-                        <option value="yegua"    {% if caballo and caballo.sexo == 'yegua' %}selected{% endif %}>Yegua</option>
+                        <option value="yegua" {% if caballo and caballo.sexo == 'yegua' %}selected{% endif %}>Yegua</option>
                         <option value="semental" {% if caballo and caballo.sexo == 'semental' %}selected{% endif %}>Semental</option>
-                        <option value="capón"    {% if caballo and caballo.sexo == 'capón' %}selected{% endif %}>Capón</option>
+                        <option value="capón" {% if caballo and caballo.sexo == 'capón' %}selected{% endif %}>Capón</option>
                     </select>
                 </div>
 
@@ -93,7 +107,7 @@
 
                 <div>
                     <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Premio (€) *</label>
-                    <input type="number" name="premio" required min="0"
+                    <input type="number" name="premio" required min="1"
                            value="{% if caballo %}{{ caballo.premio }}{% endif %}"
                            placeholder="Ej: 50000" class="campo-input">
                 </div>
