@@ -20,6 +20,7 @@
                         'fondo':    '#0a1f16',
                         'carta':    '#0f2d1e',
                         'borde':    '#1a4a2e',
+                        'verde':    '#5dd99b',
                     },
                     fontFamily: {
                         'display': ['"Playfair Display"', 'serif'],
@@ -35,7 +36,6 @@
     <style>
         body { font-family: 'DM Sans', sans-serif; }
 
-        /* Línea dorada animada en hover de nav links */
         .nav-link {
             position: relative;
         }
@@ -49,12 +49,10 @@
         }
         .nav-link:hover::after { width: 100%; }
 
-        /* Scrollbar personalizada */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0a1f16; }
         ::-webkit-scrollbar-thumb { background: #1D4E3A; border-radius: 3px; }
 
-        /* Grain texture overlay */
         body::before {
             content: '';
             position: fixed; inset: 0;
@@ -69,12 +67,12 @@
 
 <body class="bg-fondo text-white min-h-screen flex flex-col">
 
-    <!-- ══ NAVBAR ══ -->
+    <!-- NAVBAR -->
     <nav class="bg-tierra/90 backdrop-blur border-b border-dorado/30 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
 
-            <!-- Logo -->
-            <a href="/" class="flex items-center gap-3 group">
+            <!-- logo -->
+            <a href="/caballos" class="flex items-center gap-3 group">
                 <div class="w-10 h-10 rounded-full bg-bosque border-2 border-dorado flex items-center justify-center">
                     <span class="text-dorado font-black text-sm">WR</span>
                 </div>
@@ -83,37 +81,57 @@
                 </span>
             </a>
 
-            <!-- Links -->
-            <div class="hidden md:flex items-center gap-8 text-sm font-medium uppercase tracking-widest text-crema/70">
+            <!-- links desktop -->
+            <div class="hidden md:flex items-center gap-6 text-sm font-medium uppercase tracking-widest text-crema/70">
                 <a href="/caballos" class="nav-link hover:text-crema transition-colors {% if paginaActual == 'caballos' %}text-dorado{% endif %}">
                     <i class="bi bi-trophy mr-1"></i>Caballos
-                </a> 
-                <a href="/cuenta" class="ml-2 bg-bosque border border-dorado/50 text-dorado px-5 py-2 rounded-lg font-semibold hover:bg-dorado hover:text-tierra transition-all">
+                </a>
+
+                {% if user and user.rol == 'admin' %}
+                <a href="/admin" class="nav-link hover:text-crema transition-colors {% if paginaActual == 'admin' %}text-dorado{% endif %}">
+                    <i class="bi bi-gear mr-1"></i>Admin
+                </a>
+                {% endif %}
+
+                {% if user %}
+                <a href="/auth/logout"
+                   class="ml-2 bg-bosque border border-dorado/50 text-dorado px-5 py-2 rounded-lg font-semibold hover:bg-dorado hover:text-tierra transition-all">
+                    <i class="bi bi-box-arrow-right mr-1"></i>Salir ({{ user.login }})
+                </a>
+                {% else %}
+                <a href="/auth/login"
+                   class="ml-2 bg-bosque border border-dorado/50 text-dorado px-5 py-2 rounded-lg font-semibold hover:bg-dorado hover:text-tierra transition-all">
                     <i class="bi bi-person-circle mr-1"></i>Mi Cuenta
                 </a>
+                {% endif %}
             </div>
 
-            <!-- Hamburger mobile -->
+            <!-- hamburger mobile -->
             <button class="md:hidden text-crema text-xl" onclick="document.getElementById('menu-mobile').classList.toggle('hidden')">
                 <i class="bi bi-list"></i>
             </button>
         </div>
 
-        <!-- Mobile menu -->
+        <!-- mobile menu -->
         <div id="menu-mobile" class="hidden md:hidden bg-tierra border-t border-dorado/20 px-4 py-4 space-y-3 text-sm font-medium uppercase tracking-wider">
             <a href="/caballos" class="block text-crema/70 hover:text-dorado transition">Caballos</a>
-            <a href="/resultados" class="block text-crema/70 hover:text-dorado transition">Resultados</a>
-            <a href="/carreras" class="block text-crema/70 hover:text-dorado transition">Carreras</a>
-            <a href="/cuenta" class="block text-dorado">Mi Cuenta</a>
+            {% if user and user.rol == 'admin' %}
+            <a href="/admin" class="block text-crema/70 hover:text-dorado transition">Admin</a>
+            {% endif %}
+            {% if user %}
+            <a href="/auth/logout" class="block text-dorado">Salir ({{ user.login }})</a>
+            {% else %}
+            <a href="/auth/login" class="block text-dorado">Mi Cuenta</a>
+            {% endif %}
         </div>
     </nav>
 
-    <!-- ══ CONTENIDO ══ -->
+    <!-- CONTENIDO -->
     <main class="flex-1">
         {% block contenido %}{% endblock %}
     </main>
 
-    <!-- ══ FOOTER ══ -->
+    <!-- FOOTER -->
     <footer class="bg-tierra/60 border-t border-dorado/20 mt-16">
         <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col md:flex-row justify-between items-center gap-4 text-crema/40 text-xs">
             <span class="font-display italic text-lg text-dorado/70">WildRide</span>
@@ -125,6 +143,6 @@
             </div>
         </div>
     </footer>
-
+    
 </body>
 </html>

@@ -1,0 +1,80 @@
+{% extends "base.njk" %}
+
+{% block titulo %}Login | Wild Ride{% endblock %}
+
+{% block estilos %}
+<style>
+    .campo-input {
+        background: #0a1f16;
+        border: 1px solid #1a4a2e;
+        color: #F5EFE0;
+        border-radius: 0.75rem;
+        padding: 0.625rem 1rem;
+        width: 100%;
+        font-size: 0.875rem;
+        transition: border-color .2s, box-shadow .2s;
+    }
+    .campo-input:focus {
+        outline: none;
+        border-color: #C9A84C;
+        box-shadow: 0 0 0 3px rgba(201,168,76,.15);
+    }
+    .campo-input::placeholder { color: rgba(245,239,224,.2); }
+</style>
+{% endblock %}
+
+{% block contenido %}
+<div class="min-h-[70vh] flex items-center justify-center px-6">
+    <div class="w-full max-w-sm">
+
+        <div class="text-center mb-8">
+            <h1 class="font-display text-4xl font-black italic text-white">Login</h1>
+            <p class="text-crema/30 text-sm mt-2">Accede a tu cuenta</p>
+        </div>
+
+        {% if error %}
+        <div class="flex items-center gap-2 bg-red-900/30 border border-red-800/50 text-white text-xs px-4 py-3 rounded-xl mb-5">
+            <i class="bi bi-exclamation-triangle text-red-400"></i>
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <div class="bg-carta border border-borde rounded-2xl p-7">
+            <form action="/auth/login" method="POST" class="space-y-4">
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Usuario</label>
+                    <input type="text" name="login" required
+                           placeholder="Tu usuario" class="campo-input">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-widest text-crema/40 mb-2">Contraseña</label>
+                    <input type="password" name="password" required
+                           placeholder="Tu contraseña" class="campo-input">
+                </div>
+
+                <button type="submit"
+                        class="w-full bg-dorado hover:bg-dorado2 text-tierra font-black py-3 rounded-xl transition-all uppercase tracking-widest text-sm mt-2 active:scale-95">
+                    Entrar
+                </button>
+
+            </form>
+
+            <!-- boton para ir al registro -->
+            <div class="border-t border-borde mt-5 pt-5">
+                <a href="/auth/register"
+                   class="block text-center border border-borde hover:border-dorado/40 text-crema/40 hover:text-crema/70 font-medium px-6 py-2.5 rounded-xl transition-all text-sm uppercase tracking-widest">
+                    ¿No tienes cuenta? Regístrate
+                </a>
+            </div>
+
+        </div>
+
+        <p class="text-center text-crema/20 text-xs mt-4">
+            <a href="/caballos" class="hover:text-crema/50 transition">← Volver al catálogo</a>
+        </p>
+
+    </div>
+</div>
+{% endblock %}
