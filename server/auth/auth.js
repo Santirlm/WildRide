@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 
 const secret = process.env.JWT_SECRET || 'wildride_secret_123';
 
-// generar token con los datos del user
+// igual que en basket pero aqui el token va en cookie, no en header
 const generateToken = (user) => {
     const payload = {
         id: user._id,
@@ -16,12 +16,13 @@ const verifyToken = (token) => {
     return jwt.verify(token, secret);
 };
 
-// protege las rutas segun el rol, si no hay token manda al login
+// middleware que lee el token de la cookie en vez del header
 const protegerRutas = (rolesPermitidos) => {
     return (req, res, next) => {
         const token = req.cookies ? req.cookies.token : null;
-        if (!token) return res.redirect('/auth/login');
-
+        if (!token) {
+            return res.redirect('/auth/login');
+        }
         try {
             const decoded = verifyToken(token);
             req.user = decoded;
@@ -30,6 +31,7 @@ const protegerRutas = (rolesPermitidos) => {
             }
             next();
         } catch (err) {
+            // token expirado o invalido
             res.clearCookie('token');
             return res.redirect('/auth/login');
         }

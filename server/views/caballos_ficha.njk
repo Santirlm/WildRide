@@ -192,7 +192,7 @@
                         <div class="flex items-baseline gap-2 mb-1">
                             <span class="font-bold text-sm text-crema">{{ c.nick }}</span>
                             <span class="text-[11px] text-crema/20">
-                                {{ c.fecha | date("DD/MM/YYYY HH:mm") if c.fecha else '' }}
+                                {{ c.fecha | string | truncate(16, true, '') if c.fecha else '' }}
                             </span>
                         </div>
                         <p class="text-crema/60 text-sm leading-relaxed">{{ c.texto }}</p>
